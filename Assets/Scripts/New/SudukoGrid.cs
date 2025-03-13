@@ -153,7 +153,7 @@ public class SudukoGrid : MonoBehaviour
             }
         }
 
-        Debug.Log($"Box at [{startRow},{startCol}] sum: {sum}, valid numbers: {hasAllNumbers}");
+       //
     }
 
     /* public void CheckWinCondition()
@@ -260,7 +260,7 @@ public class SudukoGrid : MonoBehaviour
                 colFixedNumbers[col].Add(num);
               
                 grid[row, col].SetNumber(num, true); 
-                grid[row, col].SetColor(Color.yellow);
+                grid[row, col].SetColor(Color.green);
             }
         }
 
@@ -299,7 +299,7 @@ public class SudukoGrid : MonoBehaviour
           //  grid[pos.Item1, pos.Item2].SetDraggable(true); // Allow these cells to be interactable.
         }
 
-        // Optionally, print the final board configuration.
+      
         PrintBoard(puzzle, "Puzzle");
     }
 

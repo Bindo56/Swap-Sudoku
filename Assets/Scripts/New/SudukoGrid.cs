@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-
-
 public class SudukoGrid : MonoBehaviour
 {
     public GameObject cellPrefab;
@@ -66,9 +64,10 @@ public class SudukoGrid : MonoBehaviour
             // Second cell selection
             firstSelectedCell.SetColor(Color.white);
             SwapCells(firstSelectedCell, clickedCell);
-            firstSelectedCell = null; 
+            firstSelectedCell = null;
 
-            CheckWinCondition(); // Validate the Sudoku grid
+          //CheckBoardValidity();
+            CheckWinCondition(); // Validate the Sudoku grid    
         }
     }
 
@@ -94,11 +93,68 @@ public class SudukoGrid : MonoBehaviour
         cellB.SetNumber(numberA);
 
         swapCount--;
+
+        CheckBoxSum(cellA.row, cellA.col);
+        CheckBoxSum(cellB.row, cellB.col);
         UpdateSwapCountDisplay();
 
     }
     #endregion
 
+    private void CheckBoxSum(int row, int col)
+    {
+        int startRow = (row / 3) * 3;
+        int startCol = (col / 3) * 3;
+        int sum = 0;
+        bool hasAllNumbers = true;
+        HashSet<int> boxNumbers = new HashSet<int>();
+
+       
+        for (int r = startRow; r < startRow + 3; r++)
+        {
+            for (int c = startCol; c < startCol + 3; c++)
+            {
+                int num = grid[r, c].GetNumber();
+                sum += num;
+
+               
+                if (num < 1 || num > 9 || !boxNumbers.Add(num))
+                {
+                    hasAllNumbers = false;
+                }
+            }
+        }
+
+       
+        for (int r = startRow; r < startRow + 3; r++)
+        {
+            for (int c = startCol; c < startCol + 3; c++)
+            {
+                if (grid[r, c].IsFixed)
+                {
+                   
+                    continue;
+                }
+                else if (sum == 45 && hasAllNumbers)
+                {
+                  
+                    grid[r, c].SetColor(Color.green);
+                }
+                else if (sum == 45)
+                {
+                   
+                    grid[r, c].SetColor(new Color(0.8f, 1.0f, 0.8f)); // Light green
+                }
+                else
+                {
+                   
+                    grid[r, c].SetColor(Color.white);
+                }
+            }
+        }
+
+        Debug.Log($"Box at [{startRow},{startCol}] sum: {sum}, valid numbers: {hasAllNumbers}");
+    }
 
     /* public void CheckWinCondition()
      {
@@ -204,7 +260,7 @@ public class SudukoGrid : MonoBehaviour
                 colFixedNumbers[col].Add(num);
               
                 grid[row, col].SetNumber(num, true); 
-                grid[row, col].SetColor(Color.green);
+                grid[row, col].SetColor(Color.yellow);
             }
         }
 
@@ -549,6 +605,8 @@ public class SudukoGrid : MonoBehaviour
             Debug.Log("Max iterations reached, puzzle not solved.");
         }
     }
+
+    #region AutoSolver
     public void CheckSolvability()
     {
         /* int[,] currentPuzzle = GetCurrentGridState();
@@ -709,6 +767,7 @@ public class SudukoGrid : MonoBehaviour
                     return false;
         return true;
     }
+    #endregion
     #endregion
 
     private void UpdateSwapCountDisplay()
@@ -904,6 +963,7 @@ public class SudukoGrid : MonoBehaviour
                         int num = grid[row, col].GetNumber();
                         blockNumbers.Add(num);
                         blockSum += num;
+                        Debug.Log(blockSum);
                     }
                 }
                 if (blockNumbers.Count != 9 || blockSum != 45)

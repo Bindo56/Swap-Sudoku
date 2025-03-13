@@ -29,7 +29,7 @@ public class SudukoCell : MonoBehaviour
 
         if (IsFixed)
         {
-            GetComponent<Image>().color = Color.green; // Highlight fixed cells
+            GetComponent<Image>().color = Color.blue; // Highlight fixed cells
         }
         else
         {
@@ -50,6 +50,10 @@ public class SudukoCell : MonoBehaviour
     public void SetColor(Color color)
     {
         GetComponent<Image>().color = color;
+    }
+    public Color GetColor()
+    {
+        return GetComponent<Image>().color;
     }
 
 }

@@ -1,4 +1,14 @@
-﻿
+﻿/*
+ * 
+ * 
+ * 
+ *                                                                                          Depricated Code
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -37,7 +47,6 @@ public class SudukoGrid : MonoBehaviour
                 RectTransform rectTransform = newCell.GetComponent<RectTransform>();
                 rectTransform.anchoredPosition = startPosition + new Vector2(col * cellSize, -row * cellSize);
 
-               
                 grid[row, col] = cell;
                 cell.SetCoordinates(row, col);
             }
@@ -83,11 +92,11 @@ public class SudukoGrid : MonoBehaviour
         int numberA = cellA.GetNumber();
         int numberB = cellB.GetNumber();
 
-       /* if (!IsValidMove(cellA.row, cellA.col, numberB) || !IsValidMove(cellB.row, cellB.col, numberA))
+       *//* if (!IsValidMove(cellA.row, cellA.col, numberB) || !IsValidMove(cellB.row, cellB.col, numberA))
         {
             Debug.Log("Invalid move!");
             return;
-        }*/
+        }*//*
 
         cellA.SetNumber(numberB);
         cellB.SetNumber(numberA);
@@ -105,66 +114,90 @@ public class SudukoGrid : MonoBehaviour
     {
         int startRow = (row / 3) * 3;
         int startCol = (col / 3) * 3;
-        int sum = 0;
-        bool hasAllNumbers = true;
-        HashSet<int> boxNumbers = new HashSet<int>();
+        int boxSum = 0;
+        bool boxHasAllNumbers = true;
 
-       
+        HashSet<int> boxNumbers = new HashSet<int>();
         for (int r = startRow; r < startRow + 3; r++)
         {
             for (int c = startCol; c < startCol + 3; c++)
             {
                 int num = grid[r, c].GetNumber();
-                sum += num;
-
-               
+                boxSum += num;
                 if (num < 1 || num > 9 || !boxNumbers.Add(num))
                 {
-                    hasAllNumbers = false;
+                    boxHasAllNumbers = false;
                 }
             }
         }
 
-       
+        // Check row
+        int rowSum = 0;
+        bool rowHasAllNumbers = true;
+        HashSet<int> rowNumbers = new HashSet<int>();
+        for (int c = 0; c < 9; c++)
+        {
+            int num = grid[row, c].GetNumber();
+            rowSum += num;
+            if (num < 1 || num > 9 || !rowNumbers.Add(num))
+            {
+                rowHasAllNumbers = false;
+            }
+        }
+
+        // Check column
+        int colSum = 0;
+        bool colHasAllNumbers = true;
+        HashSet<int> colNumbers = new HashSet<int>();
+        for (int r = 0; r < 9; r++)
+        {
+            int num = grid[r, col].GetNumber();
+            colSum += num;
+            if (num < 1 || num > 9 || !colNumbers.Add(num))
+            {
+                colHasAllNumbers = false;
+            }
+        }
+
+        // Set colors based on all checks
         for (int r = startRow; r < startRow + 3; r++)
         {
             for (int c = startCol; c < startCol + 3; c++)
             {
                 if (grid[r, c].IsFixed)
                 {
-                   
                     continue;
                 }
-                else if (sum == 45 && hasAllNumbers)
+                else if (boxSum == 45 && boxHasAllNumbers &&
+                        (r == row ? (rowSum == 45 && rowHasAllNumbers) : true) &&
+                        (c == col ? (colSum == 45 && colHasAllNumbers) : true))
                 {
-                  
                     grid[r, c].SetColor(Color.green);
                 }
-                else if (sum == 45)
+                else if (boxSum == 45)
                 {
-                   
-                    grid[r, c].SetColor(new Color(0.8f, 1.0f, 0.8f)); // Light green
+                    
+                   // grid[r, c].SetColor(new Color(0.8f, 1.0f, 0.8f));
+                    grid[r, c].SetColor(Color.green);
                 }
                 else
                 {
-                   
                     grid[r, c].SetColor(Color.white);
                 }
             }
         }
-
-       //
+        //
     }
 
-    /* public void CheckWinCondition()
+    *//* public void CheckWinCondition()
      {
          // Add logic to check if the Sudoku puzzle is solved
          Debug.Log("Checking win condition...");
-     }*/
+     }*//*
     void GeneratePuzzle()
     {
         #region Depricated PuzzleGen
-        /* solution = SudokuSolver.GenerateSudokuSolution();
+        *//* solution = SudokuSolver.GenerateSudokuSolution();
          int[,] puzzle = (int[,])solution.Clone();*//*
        
         int[,] solution = GenerateFullSolution();//genrate;
@@ -222,7 +255,7 @@ public class SudukoGrid : MonoBehaviour
                    // grid[row, col].SetDraggable(true); // Allow swapping for these cells
                 }
             }
-        }*/
+        }*//*
         #endregion
 
 
@@ -260,7 +293,7 @@ public class SudukoGrid : MonoBehaviour
                 colFixedNumbers[col].Add(num);
               
                 grid[row, col].SetNumber(num, true); 
-                grid[row, col].SetColor(Color.green);
+                grid[row, col].SetColor(Color.blue);
             }
         }
 
@@ -491,7 +524,7 @@ public class SudukoGrid : MonoBehaviour
         {
             bool improved = false;
 
-            // Process each 3×3 block.
+           
             for (int blockRow = 0; blockRow < 3; blockRow++)
             {
                 for (int blockCol = 0; blockCol < 3; blockCol++)
@@ -547,7 +580,7 @@ public class SudukoGrid : MonoBehaviour
                 }
             }
 
-            // ramdom swap 
+           
             if (!improved)
             {
                 int blockRow = rng.Next(3);
@@ -609,8 +642,8 @@ public class SudukoGrid : MonoBehaviour
     #region AutoSolver
     public void CheckSolvability()
     {
-        /* int[,] currentPuzzle = GetCurrentGridState();
-         int[,] solved = SudokuSolver.SolvePuzzle(currentPuzzle);*/
+        *//* int[,] currentPuzzle = GetCurrentGridState();
+         int[,] solved = SudokuSolver.SolvePuzzle(currentPuzzle);*//*
         // SolvePuzzle();
         StartCoroutine(AutoSolveBySwapping());
        // Debug.Log(solved != null ? "Puzzle is solvable!" : "No solution exists!");
@@ -819,7 +852,7 @@ public class SudukoGrid : MonoBehaviour
         }
        
 
-        /*int[,] currentPuzzle = GetCurrentGridState();
+        *//*int[,] currentPuzzle = GetCurrentGridState();
         int[,] solved = SudokuSolver.SolvePuzzle(currentPuzzle);
 
         if (solved != null)
@@ -834,13 +867,13 @@ public class SudukoGrid : MonoBehaviour
                     }
                 }
             }
-        }*/
+        }*//*
 
 
 
         //new 
         // int[,] solved = SudokuSolver.SolvePuzzle(testBoard);
-        /* int[,] currentPuzzle = GetCurrentGridState();
+        *//* int[,] currentPuzzle = GetCurrentGridState();
          PrintBoard(currentPuzzle);
          for (int row = 0; row < 9; row++)
          {
@@ -883,7 +916,7 @@ public class SudukoGrid : MonoBehaviour
                 else
                 {
                     Debug.Log(" No solution exists for this puzzle!");
-                }*/
+                }*//*
         #endregion
 
     }
@@ -925,6 +958,7 @@ public class SudukoGrid : MonoBehaviour
                 int num = grid[row, col].GetNumber();
                 rowNumbers.Add(num);
                 rowSum += num;
+
             }
             if (rowNumbers.Count != 9 || rowSum != 45)
             {
@@ -963,7 +997,7 @@ public class SudukoGrid : MonoBehaviour
                         int num = grid[row, col].GetNumber();
                         blockNumbers.Add(num);
                         blockSum += num;
-                        Debug.Log(blockSum);
+                        //  Debug.Log(blockSum);
                     }
                 }
                 if (blockNumbers.Count != 9 || blockSum != 45)
@@ -972,12 +1006,14 @@ public class SudukoGrid : MonoBehaviour
                 }
             }
         }
+
+      //  grid[row, col].SetColor(Color.blue);
         return true;
     }
 
 
     //Depricated
-    /* public bool IsValidMove(int row, int col, int number)
+    *//* public bool IsValidMove(int row, int col, int number)
      {
          // Check row
          for (int i = 0; i < 9; i++)
@@ -1002,7 +1038,7 @@ public class SudukoGrid : MonoBehaviour
              }
          }
          return true;
-     }*/
+     }*//*
 
     #region checkIfSolved
    
@@ -1023,9 +1059,9 @@ public class SudukoGrid : MonoBehaviour
     void ShowWinMessage()
     {
        //reload or chenge secne
-       
+        
        
         Debug.Log("?? YOU WIN! ??");
     }
     #endregion
-}
+}*/

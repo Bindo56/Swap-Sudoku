@@ -406,7 +406,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1624698856}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: SudukoGrid, Assembly-CSharp
         m_MethodName: CheckSolvability
         m_Mode: 1
@@ -642,12 +642,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1624698854}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32ab1518e5bf1c24c816a31a721b4680, type: 3}
+  m_Script: {fileID: 11500000, guid: 00f7065fa8040fe44a5ee73c6329182c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 678634564198981698, guid: f960e0a4af972384f802b0edcfd66704, type: 3}
   gridParent: {fileID: 1624698855}
-  swapCount: 40
+  swapCount: 50
   swapCountText: {fileID: 1353907444}
 --- !u!1 &1670981422
 GameObject:

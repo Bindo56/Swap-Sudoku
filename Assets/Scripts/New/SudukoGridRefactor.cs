@@ -71,13 +71,11 @@ public class SudukoGrid : MonoBehaviour
             firstSelectedCell.SetColor(Color.white);
             SwapCells(firstSelectedCell, clickedCell);
             firstSelectedCell = null;
-
-            // Check if the board is valid after the swap
-            CheckWinCondition();
         }
+          CheckWinCondition();
     }
 
-    private void SwapCells(SudukoCell cellA, SudukoCell cellB)
+    public void SwapCells(SudukoCell cellA, SudukoCell cellB)
     {
         if (swapCount <= 0)
         {
@@ -97,12 +95,12 @@ public class SudukoGrid : MonoBehaviour
         swapCount--;
         UpdateSwapCountDisplay();
 
-       
         CheckCellMatchesSolution(cellA.row, cellA.col);
         CheckCellMatchesSolution(cellB.row, cellB.col);
 
-       
         CheckWinCondition();
+
+      //  CheckWinCondition();
     }
     #endregion
 

@@ -20,14 +20,15 @@ public class SudokuPuzzleManager : MonoBehaviour
     private const string SAVE_FILE_NAME = "sudoku_puzzles.json";
     private const string PROGRESS_FILE_NAME = "sudoku_progress.json";
     
-    private List<SudokuPuzzleData> puzzles = new List<SudokuPuzzleData>();
+    private List<SudokuPuzzleData> puzzles = new List<SudokuPuzzleData>(); 
     private SudokuProgressData progressData;
     
     [System.Serializable]
     public class SudokuPuzzleData
     {
         public int levelNumber; //testing
-        public int[,] solution;
+        public List<int> solutionFlat;
+      //  public int[,] solution;
         public List<FixedCellData> fixedCells;
         public int initialSwaps;
         
@@ -45,6 +46,28 @@ public class SudokuPuzzleManager : MonoBehaviour
                 this.value = value;
             }
         }
+
+        [JsonIgnore] // this won't get serialized
+        public int[,] Solution2D
+        {
+            get
+            {
+                if (solutionFlat == null || solutionFlat.Count != 81)
+                {
+                    Debug.LogError("solutionFlat is null or incorrectly sized.");
+                    return new int[9, 9];
+                }
+
+                int[,] grid = new int[9, 9];
+                for (int i = 0; i < solutionFlat.Count; i++)
+                {
+                    int row = i / 9;
+                    int col = i % 9;
+                    grid[row, col] = solutionFlat[i];
+                }
+                return grid;
+            }
+        }
     }
     
     [System.Serializable]
@@ -56,16 +79,20 @@ public class SudokuPuzzleManager : MonoBehaviour
         public class LevelStatus
         {
             public int levelNumber;
+            public float timer;
             public bool completed;
             
-            public LevelStatus(int levelNumber, bool completed)
+            public LevelStatus(int levelNumber,float timer, bool completed)
             {
                 this.levelNumber = levelNumber;
+                this.timer = timer;
                 this.completed = completed;
             }
         }
     }
+
     
+
     private void Start()
     {
         sudokuGrid = SudukoGrid.instance;
@@ -79,6 +106,23 @@ public class SudokuPuzzleManager : MonoBehaviour
         {
             LoadPuzzlesAndProgress();
             ShowLevelSelect();
+        }
+    }
+
+    public void LoadNextLevel()
+    {
+        int currentLevel = sudokuGrid.GetCurrentLevel();
+        int nextLevel = currentLevel + 1;
+        Debug.Log(nextLevel + " -Level");
+
+        if (nextLevel <= TOTAL_PUZZLES)
+        {
+            LoadLevel(nextLevel);
+            sudokuGrid.UpdateLevelDisplay();
+        }
+        else
+        {
+            Debug.Log("No more levels!");
         }
     }
     
@@ -120,23 +164,64 @@ public class SudokuPuzzleManager : MonoBehaviour
         loadingPanel.SetActive(false);
         ShowLevelSelect();
     }
-    
+    int shuffleAttempts;
     private SudokuPuzzleData GeneratePuzzle(int levelNumber)
     {
         SudokuPuzzleData puzzle = new SudokuPuzzleData();
         puzzle.levelNumber = levelNumber;
-        
-        // Generate a full Sudoku solution
-        puzzle.solution = GenerateFullSolution();
-        
-        // Create fixed cells (the difficulty increases with level)
-        int fixedCellsCount = Mathf.Max(20, 40 - (levelNumber / 10)); // Between 20-40 fixed cells
-        puzzle.fixedCells = GenerateFixedCells(puzzle.solution, fixedCellsCount);
-        
-        // Set initial swaps based on level difficulty
-        puzzle.initialSwaps = 30 + (levelNumber / 5); // Between 30-50 swaps
-        
+
+        shuffleAttempts = 0;
+
+        // Generate a full valid solution
+        int[,] fullSolution = GenerateFullSolution();
+
+        // Store the flattened version in puzzle.solutionFlat
+        puzzle.solutionFlat = new List<int>();
+        for (int row = 0; row < 9; row++)
+        {
+            for (int col = 0; col < 9; col++)
+            {
+                puzzle.solutionFlat.Add(fullSolution[row, col]);
+            }
+        }
+
+        // Now we can use the Solution2D property safely
+        int[,] solution = puzzle.Solution2D;
+
+        int fixedCellsCount = Mathf.Max(20, 40 - (levelNumber / 10)); // Easy = more fixed
+        puzzle.fixedCells = GenerateFixedCells(solution, fixedCellsCount);
+
+        int[,] playBoard = new int[9, 9];
+        foreach (var fixedCell in puzzle.fixedCells)
+        {
+            playBoard[fixedCell.row, fixedCell.col] = fixedCell.value;
+        }
+
+        int moveNeededCount = 0;
+        for (int row = 0; row < 9; row++)
+        {
+            for (int col = 0; col < 9; col++)
+            {
+                if (playBoard[row, col] != solution[row, col])
+                {
+                    moveNeededCount++;
+                }
+            }
+        }
+
+        int extraMoves = 0;
+        if (levelNumber < 15)
+            extraMoves = 15;
+        else if (levelNumber >= 30)
+            extraMoves = UnityEngine.Random.Range(5, 9);
+        else
+            extraMoves = 10;
+
+        puzzle.initialSwaps = moveNeededCount + extraMoves;
+
         return puzzle;
+
+
     }
     
     private List<SudokuPuzzleData.FixedCellData> GenerateFixedCells(int[,] solution, int fixedCellsCount)
@@ -234,9 +319,10 @@ public class SudokuPuzzleManager : MonoBehaviour
     
     private List<int> GetShuffledNumbers()
     {
+        shuffleAttempts++; // Increment on each  call to reflect difficulty
         List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         System.Random rng = new System.Random();
-        
+
         for (int i = numbers.Count - 1; i > 0; i--)
         {
             int j = rng.Next(i + 1);
@@ -244,32 +330,44 @@ public class SudokuPuzzleManager : MonoBehaviour
             numbers[i] = numbers[j];
             numbers[j] = temp;
         }
-        
+
         return numbers;
+
+        
     }
     
-    private void SavePuzzlesToJson()
+    private void SavePuzzlesToJson() //saving json in compress way and easy to seserilize and deserialze //
     {
         string filePath = Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
-        string json = JsonConvert.SerializeObject(puzzles, new JsonSerializerSettings
+
+        using (StreamWriter writer = new StreamWriter(filePath))
         {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            TypeNameHandling = TypeNameHandling.Auto,
-            Formatting = Formatting.Indented
-        });
-        
-        File.WriteAllText(filePath, json);
-        Debug.Log($"Saved puzzles to {filePath}");
+            foreach (var puzzle in puzzles)
+            {
+                string line = JsonConvert.SerializeObject(puzzle, new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Formatting = Formatting.None 
+                });
+
+                writer.WriteLine(line);
+            }
+        }
+
+        Debug.Log($"Saved {puzzles.Count} puzzles to {filePath}");
+
     }
-    
+
+  
     private void InitializeProgressData()
     {
         progressData = new SudokuProgressData();
         
         for (int i = 1; i <= TOTAL_PUZZLES; i++)
         {
-            Debug.Log(i);
-            progressData.levels.Add(new SudokuProgressData.LevelStatus(i, false));
+          //  Debug.Log(i);
+            progressData.levels.Add(new SudokuProgressData.LevelStatus(i,0 ,false));
         }
         
         SaveProgressData();
@@ -286,22 +384,41 @@ public class SudokuPuzzleManager : MonoBehaviour
         File.WriteAllText(filePath, json);
         Debug.Log($"Saved progress to {filePath}");
     }
-    
+    public void ClearLevelSelectPanel()
+    {
+        foreach (Transform child in levelSelectPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
     private void LoadPuzzlesAndProgress()
     {
         string puzzlesPath = Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
         string progressPath = Path.Combine(Application.persistentDataPath, PROGRESS_FILE_NAME);
-        
+
+        // Load puzzles
         if (File.Exists(puzzlesPath))
         {
-            string json = File.ReadAllText(puzzlesPath);
-            puzzles = JsonConvert.DeserializeObject<List<SudokuPuzzleData>>(json, new JsonSerializerSettings
+            puzzles = new List<SudokuPuzzleData>();
+            string[] lines = File.ReadAllLines(puzzlesPath);
+
+            foreach (string line in lines)
             {
-                TypeNameHandling = TypeNameHandling.Auto
-            });
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    var puzzle = JsonConvert.DeserializeObject<SudokuPuzzleData>(line, new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.Auto
+                    });
+                    puzzles.Add(puzzle);
+                }
+            }
+
             Debug.Log($"Loaded {puzzles.Count} puzzles");
         }
-        
+
+        // Load progress
         if (File.Exists(progressPath))
         {
             string json = File.ReadAllText(progressPath);
@@ -312,18 +429,43 @@ public class SudokuPuzzleManager : MonoBehaviour
         {
             InitializeProgressData();
         }
+
+        
     }
-    
+
+    [ContextMenu("Delete Saved Game Data")] //call from inspector ,,script name and then  three dot and click on delete saved game data
+    private void DeleteSavedGameData()
+    {
+        string puzzleFilePath = Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
+        string progressFilePath = Path.Combine(Application.persistentDataPath, PROGRESS_FILE_NAME);
+
+        bool deletedAny = false;
+
+        if (File.Exists(puzzleFilePath))
+        {
+            File.Delete(puzzleFilePath);
+            Debug.Log("Deleted puzzle save data.");
+            deletedAny = true;
+        }
+
+        if (File.Exists(progressFilePath))
+        {
+            File.Delete(progressFilePath);
+            Debug.Log("Deleted progress save data.");
+            deletedAny = true;
+        }
+
+        if (!deletedAny)
+        {
+            Debug.LogWarning("No save files found to delete.");
+        }
+    }
+
     private void ShowLevelSelect()
     {
         levelSelectPanel.SetActive(true);
         
-        // Clear existing buttons
-       /* foreach (Transform child in levelButtonContainer)
-        {
-            Destroy(child.gameObject);
-        }*/
-        
+ 
         // Create level buttons
         Debug.Log(progressData.levels.Count + "LevelBtn");
         for (int i = 0; i < progressData.levels.Count; i++)
@@ -341,12 +483,14 @@ public class SudokuPuzzleManager : MonoBehaviour
             if (levelStatus.completed)
             {
                 buttonText.color = Color.green;
+                sudokuGrid.SetHighScoreTimer(levelStatus.timer);
+                
             }
             
             // Enable or disable based on availability
             bool isAvailable = levelStatus.levelNumber == 1 || 
                                (levelStatus.levelNumber > 1 && progressData.levels[i-1].completed);
-          //  button.interactable = isAvailable;// chganges
+            button.interactable = isAvailable;// changes
             
             // Store level number and set click handler
             int levelNumber = levelStatus.levelNumber;
@@ -364,15 +508,19 @@ public class SudokuPuzzleManager : MonoBehaviour
             Debug.LogError($"Puzzle for level {levelNumber} not found!");
             return;
         }
+      
+           SudokuProgressData.LevelStatus levelStatus = progressData.levels[levelNumber - 1];
+           sudokuGrid.SetHighScoreTimer(levelStatus.timer);
         
         // Hide level select
         levelSelectPanel.SetActive(false);
-
         // Modify the grid
         //  sudokuGrid.ClearGrid();
         sudokuGrid.GenerateGrid();
-        sudokuGrid.SetSolution(puzzle.solution);
-        PrintGrid(puzzle.solution);
+      //  sudokuGrid.SetSolution(puzzle.solution);
+        sudokuGrid.SetSolution(puzzle.Solution2D);
+       // PrintGrid(puzzle.solution);
+        PrintGrid(puzzle.Solution2D);
         sudokuGrid.SetSwapCount(puzzle.initialSwaps);
         sudokuGrid.SetCurrentLevel(levelNumber);
         
@@ -403,19 +551,34 @@ public class SudokuPuzzleManager : MonoBehaviour
 
         Debug.Log("Grid:\n" + output);
     }
-    public void MarkLevelCompleted(int levelNumber)
+    public void MarkLevelCompleted(int levelNumber, float completionTime)
     {
-        SudokuProgressData.LevelStatus level = progressData.levels.Find(l => l.levelNumber == levelNumber);
+
+        var level = progressData.levels.Find(l => l.levelNumber == levelNumber);
+        if (level != null)
+        {
+            level.completed = true;
+
+            if (level.timer == 0f || completionTime < level.timer)
+            {
+                level.timer = completionTime;
+                Debug.Log($"New best time for level {levelNumber}: {completionTime:F2}s");
+            }
+
+            SaveProgressData();
+        }
+        /*SudokuProgressData.LevelStatus level = progressData.levels.Find(l => l.levelNumber == levelNumber);
         if (level != null)
         {
             level.completed = true;
             SaveProgressData();
-        }
+        }*/
     }
     
     public void ReturnToLevelSelect()
     {
-        sudokuGrid.gameObject.SetActive(false);
+        //  sudokuGrid.gameObject.SetActive(false);
+        ClearLevelSelectPanel();
         ShowLevelSelect();
     }
 }

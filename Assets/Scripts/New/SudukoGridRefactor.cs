@@ -16,11 +16,18 @@ public class SudukoGrid : MonoBehaviour
     [SerializeField] private int swapCount = 0;
     public TextMeshProUGUI swapCountText;
     [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI timerText;
+    [SerializeField] private TextMeshProUGUI personalBestTimerText;
     [SerializeField] private Button backButton;
     [SerializeField] private SudokuPuzzleManager puzzleManager;
 
+    private float levelTimer = 0f;
+    private bool isTiming = false;
+    public float CurrentTimer => levelTimer; // Accessor for external scripts
+
+
     private bool gameWon = false;
-    private int currentLevel = 1;
+    private int currentLevel;
     private const int GRID_SIZE = 9;
     private const int BLOCK_SIZE = 3;
     private const int TOTAL_SUM = 45;
@@ -41,8 +48,44 @@ public class SudukoGrid : MonoBehaviour
         UpdateLevelDisplay();
     }
 
+    private void Update()
+    {
+        if (isTiming)
+        {
+            levelTimer += Time.deltaTime;
+            UpdateTimerDisplay();
+        }
+    }
+    private void UpdateTimerDisplay()
+    {
+        if (timerText != null)
+        {
+            timerText.text = $"Time: {levelTimer:F2}s";
+        }
+    }
+
+    public void StartTimer()
+    {
+        levelTimer = 0f;
+        isTiming = true;
+    }
+
+    public void StopTimer()
+    {
+        isTiming = false;
+    }
+
+    public float GetElapsedTime()
+    {
+        return levelTimer;
+    }
+    public void SetHighScoreTimer(float time)
+    {
+        personalBestTimerText.text = time.ToString();
+    }
+
     #region GenrateGrid
-     public void GenerateGrid()
+    public void GenerateGrid()
     {
         Debug.Log("Generating Grid");
         float cellSize = 200f;
@@ -168,6 +211,7 @@ public class SudukoGrid : MonoBehaviour
 
     public void InitializeRemainingCells()
     {
+        StartTimer();
         HashSet<(int, int)> fixedCells = GetFixedCells();
         List<int> nonFixedNumbers = new List<int>();
         List<(int, int)> nonFixedPositions = new List<(int, int)>();
@@ -234,7 +278,13 @@ public class SudukoGrid : MonoBehaviour
         UpdateLevelDisplay();
     }
 
-    private void UpdateLevelDisplay()
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+      //  UpdateLevelDisplay();
+    }
+
+    public void UpdateLevelDisplay()
     {
         if (levelText != null)
         {
@@ -269,7 +319,7 @@ public class SudukoGrid : MonoBehaviour
         return fixedCells;
     }
 
-    private int[,] GetCurrentGridState()
+    public int[,] GetCurrentGridState()
     {
         int[,] state = new int[GRID_SIZE, GRID_SIZE];
         for (int row = 0; row < GRID_SIZE; row++)
@@ -389,13 +439,15 @@ public class SudukoGrid : MonoBehaviour
             // Mark level as completed
             if (puzzleManager != null)
             {
-                puzzleManager.MarkLevelCompleted(currentLevel);
+                puzzleManager.MarkLevelCompleted(currentLevel, GetElapsedTime());
+                puzzleManager.LoadNextLevel();
             }
         }
     }
 
     void ShowWinMessage()
     {
+        StopTimer();
         // Set all cells to green to indicate victory
         for (int row = 0; row < GRID_SIZE; row++)
         {
@@ -408,6 +460,14 @@ public class SudukoGrid : MonoBehaviour
         swapCountText.text = "YOU WIN!";
 
         Debug.Log("YOU WIN!");
+       
+        gameWon = true;
+
+    }
+
+    public bool IsGameWon()
+    {
+        return gameWon;
     }
     #endregion
 }

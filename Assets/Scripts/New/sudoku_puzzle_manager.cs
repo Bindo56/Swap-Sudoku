@@ -5,7 +5,8 @@ using TMPro;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEngine.UI;
-using System;
+//using System;
+//using static UnityEditor.Progress;
 
 public class SudokuPuzzleManager : MonoBehaviour
 {
@@ -167,13 +168,14 @@ public class SudokuPuzzleManager : MonoBehaviour
     int shuffleAttempts;
     private SudokuPuzzleData GeneratePuzzle(int levelNumber)
     {
+        System.Random seededRng = new System.Random(levelNumber);
         SudokuPuzzleData puzzle = new SudokuPuzzleData();
         puzzle.levelNumber = levelNumber;
 
         shuffleAttempts = 0;
 
         // Generate a full valid solution
-        int[,] fullSolution = GenerateFullSolution();
+        int[,] fullSolution = GenerateFullSolution(seededRng);
 
         // Store the flattened version in puzzle.solutionFlat
         puzzle.solutionFlat = new List<int>();
@@ -189,7 +191,7 @@ public class SudokuPuzzleManager : MonoBehaviour
         int[,] solution = puzzle.Solution2D;
 
         int fixedCellsCount = Mathf.Max(20, 40 - (levelNumber / 10)); // Easy = more fixed
-        puzzle.fixedCells = GenerateFixedCells(solution, fixedCellsCount);
+        puzzle.fixedCells = GenerateFixedCells(solution, fixedCellsCount,seededRng);
 
         int[,] playBoard = new int[9, 9];
         foreach (var fixedCell in puzzle.fixedCells)
@@ -213,18 +215,15 @@ public class SudokuPuzzleManager : MonoBehaviour
         if (levelNumber < 15)
             extraMoves = 15;
         else if (levelNumber >= 30)
-            extraMoves = UnityEngine.Random.Range(5, 9);
+            extraMoves = seededRng.Next(5, 9);
         else
             extraMoves = 10;
 
         puzzle.initialSwaps = moveNeededCount + extraMoves;
-
         return puzzle;
-
-
     }
     
-    private List<SudokuPuzzleData.FixedCellData> GenerateFixedCells(int[,] solution, int fixedCellsCount)
+    private List<SudokuPuzzleData.FixedCellData> GenerateFixedCells(int[,] solution, int fixedCellsCount , System.Random rand)
     {
         List<SudokuPuzzleData.FixedCellData> fixedCells = new List<SudokuPuzzleData.FixedCellData>();
         HashSet<(int, int)> usedPositions = new HashSet<(int, int)>();
@@ -237,7 +236,7 @@ public class SudokuPuzzleManager : MonoBehaviour
             colFixedNumbers[i] = new HashSet<int>();
         }
         
-        System.Random rand = new System.Random();
+      //  System.Random rand = new System.Random();
         
         while (fixedCells.Count < fixedCellsCount)
         {
@@ -260,14 +259,14 @@ public class SudokuPuzzleManager : MonoBehaviour
         return fixedCells;
     }
     
-    private int[,] GenerateFullSolution()
+    private int[,] GenerateFullSolution(System.Random rng)
     {
         int[,] board = new int[9, 9];
-        FillBoard(board);
+        FillBoard(board,rng);
         return board;
     }
     
-    private bool FillBoard(int[,] board)
+    private bool FillBoard(int[,] board, System.Random rng)
     {
         for (int row = 0; row < 9; row++)
         {
@@ -275,12 +274,12 @@ public class SudokuPuzzleManager : MonoBehaviour
             {
                 if (board[row, col] == 0)
                 {
-                    foreach (int num in GetShuffledNumbers())
+                    foreach (int num in GetShuffledNumbers(rng))
                     {
                         if (IsValidNumber(board, row, col, num))
                         {
                             board[row, col] = num;
-                            if (FillBoard(board))
+                            if (FillBoard(board, rng))
                                 return true;
                             board[row, col] = 0;
                         }
@@ -317,11 +316,11 @@ public class SudokuPuzzleManager : MonoBehaviour
         return true;
     }
     
-    private List<int> GetShuffledNumbers()
+    private List<int> GetShuffledNumbers(System.Random rng)
     {
         shuffleAttempts++; // Increment on each  call to reflect difficulty
         List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        System.Random rng = new System.Random();
+      //  System.Random rng = new System.Random();
 
         for (int i = numbers.Count - 1; i > 0; i--)
         {
@@ -518,7 +517,7 @@ public class SudokuPuzzleManager : MonoBehaviour
         //  sudokuGrid.ClearGrid();
         sudokuGrid.GenerateGrid();
       //  sudokuGrid.SetSolution(puzzle.solution);
-        sudokuGrid.SetSolution(puzzle.Solution2D);
+        sudokuGrid.SetSolution(puzzle.Solution2D); 
        // PrintGrid(puzzle.solution);
         PrintGrid(puzzle.Solution2D);
         sudokuGrid.SetSwapCount(puzzle.initialSwaps);

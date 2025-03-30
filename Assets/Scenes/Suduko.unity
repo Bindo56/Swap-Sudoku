@@ -971,7 +971,7 @@ GameObject:
   - component: {fileID: 1353907445}
   - component: {fileID: 1353907444}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: chanceReamaing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1281,8 +1281,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellPrefab: {fileID: 678634564198981698, guid: f960e0a4af972384f802b0edcfd66704, type: 3}
   gridParent: {fileID: 1624698855}
-  swapCount: 50
-  swapCountText: {fileID: 1353907444}
+  chancesRemaining: 3
+  chancesRemainingText: {fileID: 1353907444}
   levelText: {fileID: 755466643}
   timerText: {fileID: 388010648}
   personalBestTimerText: {fileID: 1477599495}

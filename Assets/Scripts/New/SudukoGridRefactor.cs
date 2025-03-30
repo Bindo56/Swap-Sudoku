@@ -13,8 +13,10 @@ public class SudukoGrid : MonoBehaviour
     private SudukoCell[,] grid = new SudukoCell[9, 9];
     private int[,] solution;
 
-    [SerializeField] private int swapCount = 0;
-    public TextMeshProUGUI swapCountText;
+    /* [SerializeField] private int swapCount = 0;
+     public TextMeshProUGUI swapCountText;*/
+    [SerializeField] int chancesRemaining = 3;
+    [SerializeField] private TextMeshProUGUI chancesRemainingText;
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private TextMeshProUGUI personalBestTimerText;
@@ -44,7 +46,7 @@ public class SudukoGrid : MonoBehaviour
         }
 
        // GenerateGrid();
-        UpdateSwapCountDisplay();
+        //UpdateSwapCountDisplay();
         UpdateLevelDisplay();
     }
 
@@ -55,6 +57,7 @@ public class SudukoGrid : MonoBehaviour
             levelTimer += Time.deltaTime;
             UpdateTimerDisplay();
         }
+        chancesRemainingText.text = $"Chances Remaining: {chancesRemaining}";
     }
     private void UpdateTimerDisplay()
     {
@@ -91,6 +94,8 @@ public class SudukoGrid : MonoBehaviour
         float cellSize = 200f;
         Vector2 startPosition = new Vector2(50, -50);
 
+        ClearLevelCell();
+
         for (int row = 0; row < GRID_SIZE; row++)
         {
             for (int col = 0; col < GRID_SIZE; col++)
@@ -103,6 +108,20 @@ public class SudukoGrid : MonoBehaviour
 
                 grid[row, col] = cell;
                 cell.SetCoordinates(row, col);
+            }
+        }
+    }
+
+    private void ClearLevelCell()
+    {
+        if (gridParent == null)
+            return;
+
+        foreach (Transform child in gridParent)
+        {
+            if (child != null)
+            {
+                Destroy(child.gameObject);
             }
         }
     }
@@ -136,9 +155,15 @@ public class SudukoGrid : MonoBehaviour
 
     public void SwapCells(SudukoCell cellA, SudukoCell cellB)
     {
-        if (swapCount <= 0)
+       /* if (swapCount <= 0)
         {
             swapCountText.text = "Game Over";
+            return;
+        }*/
+
+        if(chancesRemaining <= 0)
+        {
+            chancesRemainingText.text = "Game Over";
             return;
         }
 
@@ -151,26 +176,34 @@ public class SudukoGrid : MonoBehaviour
         cellA.SetNumber(numberB);
         cellB.SetNumber(numberA);
 
-        swapCount--;
-        UpdateSwapCountDisplay();
+      //  swapCount--;
+        //UpdateSwapCountDisplay();
 
-        CheckCellMatchesSolution(cellA.row, cellA.col);
-        CheckCellMatchesSolution(cellB.row, cellB.col);
+       /* CheckCellMatchesSolution(cellA.row, cellA.col);
+        CheckCellMatchesSolution(cellB.row, cellB.col);*/
 
+        CheckBothCells(cellA.row, cellA.col, cellB.row, cellB.col);
         CheckWinCondition();
     }
     #endregion
 
     #region Cell Validation and Coloring Active
-    private void UpdateCellValidityDisplay(int row, int col)
-    {
-        CheckCellMatchesSolution(row, col);
-    }
+  
 
-    private void CheckCellMatchesSolution(int row, int col)
+    void CheckBothCells(int rowA, int colA, int rowB, int colB)
+    {
+        bool isCorrectA = CheckSingleCell(rowA, colA);
+        bool isCorrectB = CheckSingleCell(rowB, colB);
+
+        if (!isCorrectA && !isCorrectB)
+        {
+            chancesRemaining -= 1;
+        }
+    }
+    bool CheckSingleCell(int row, int col)
     {
         if (grid[row, col].IsFixed)
-            return;
+            return true;
 
         int currentNum = grid[row, col].GetNumber();
         int solutionNum = solution[row, col];
@@ -178,12 +211,40 @@ public class SudukoGrid : MonoBehaviour
         if (currentNum == solutionNum)
         {
             grid[row, col].SetColor(Color.green);
+            return true;
         }
         else
         {
             grid[row, col].SetColor(Color.white);
+            return false;
         }
     }
+
+    /* private void UpdateCellValidityDisplay(int row, int col)
+   {
+       CheckCellMatchesSolution(row, col);
+   }*/
+
+
+
+    /* private void CheckCellMatchesSolution(int row, int col)
+     {
+         if (grid[row, col].IsFixed)
+             return;
+
+         int currentNum = grid[row, col].GetNumber();
+         int solutionNum = solution[row, col];
+
+         if (currentNum == solutionNum)
+         {
+             grid[row, col].SetColor(Color.green);
+         }
+         else
+         {
+             chancesRemaining -= 1;
+             grid[row, col].SetColor(Color.white);
+         }
+     }*/
     #endregion
 
     #region Level Management
@@ -212,6 +273,7 @@ public class SudukoGrid : MonoBehaviour
     public void InitializeRemainingCells()
     {
         StartTimer();
+        chancesRemaining = 3;
         HashSet<(int, int)> fixedCells = GetFixedCells();
         List<int> nonFixedNumbers = new List<int>();
         List<(int, int)> nonFixedPositions = new List<(int, int)>();
@@ -266,11 +328,11 @@ public class SudukoGrid : MonoBehaviour
         gameWon = false;*/
     }
 
-    public void SetSwapCount(int count)
+  /*  public void SetSwapCount(int count)
     {
         swapCount = count;
         UpdateSwapCountDisplay();
-    }
+    }*/
 
     public void SetCurrentLevel(int level)
     {
@@ -332,11 +394,11 @@ public class SudukoGrid : MonoBehaviour
         return state;
     }
 
-    private void UpdateSwapCountDisplay()
+   /* private void UpdateSwapCountDisplay()
     {
         if (swapCountText != null)
             swapCountText.text = $"Swaps: {swapCount}";
-    }
+    }*/
 
     private static void LogBoard(int[,] board, string msg)
     {
@@ -443,6 +505,24 @@ public class SudukoGrid : MonoBehaviour
                 puzzleManager.LoadNextLevel();
             }
         }
+        else if(chancesRemaining <= 0)
+        {
+            Debug.Log("0  chaces reamining");
+            chancesRemainingText.text = "Game Over";
+            //add couroutine or delay it 
+            StartCoroutine(Delay());
+
+        }
+    }
+
+    IEnumerator Delay()
+    {
+        yield return new WaitForSeconds(1);
+        if (puzzleManager != null)
+        {
+            puzzleManager.ReturnToLevelSelect();
+        }
+
     }
 
     void ShowWinMessage()
@@ -457,7 +537,7 @@ public class SudukoGrid : MonoBehaviour
             }
         }
 
-        swapCountText.text = "YOU WIN!";
+        //swapCountText.text = "YOU WIN!";
 
         Debug.Log("YOU WIN!");
        

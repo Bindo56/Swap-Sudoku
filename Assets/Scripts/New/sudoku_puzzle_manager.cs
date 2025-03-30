@@ -520,7 +520,7 @@ public class SudokuPuzzleManager : MonoBehaviour
         sudokuGrid.SetSolution(puzzle.Solution2D); 
        // PrintGrid(puzzle.solution);
         PrintGrid(puzzle.Solution2D);
-        sudokuGrid.SetSwapCount(puzzle.initialSwaps);
+       // sudokuGrid.SetSwapCount(puzzle.initialSwaps);
         sudokuGrid.SetCurrentLevel(levelNumber);
         
         // Set fixed cells

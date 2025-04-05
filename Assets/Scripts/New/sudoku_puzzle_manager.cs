@@ -31,6 +31,7 @@ public class SudokuPuzzleManager : MonoBehaviour
         public List<int> solutionFlat;
       //  public int[,] solution;
         public List<FixedCellData> fixedCells;
+        public int initialHints = 3;
         public int initialSwaps;
         
         [System.Serializable]
@@ -149,7 +150,7 @@ public class SudokuPuzzleManager : MonoBehaviour
             SudokuPuzzleData puzzle = GeneratePuzzle(i+1);
             puzzles.Add(puzzle);
             
-            // Yield to prevent freezing the UI
+            // Yield to prevent freezing the UI //IMP DON'T REMOVE THIS // REMOVING THIS CAUSE THE UNITY TO EXCUTE THIS IN SINGLE FRAME /// 
             if (i % 5 == 0)
             {
                 yield return null;
@@ -177,7 +178,7 @@ public class SudokuPuzzleManager : MonoBehaviour
         // Generate a full valid solution
         int[,] fullSolution = GenerateFullSolution(seededRng);
 
-        // Store the flattened version in puzzle.solutionFlat
+        // Store the flattened version in puzzle.solutionFlat for better json serilizations 
         puzzle.solutionFlat = new List<int>();
         for (int row = 0; row < 9; row++)
         {
@@ -187,11 +188,12 @@ public class SudokuPuzzleManager : MonoBehaviour
             }
         }
 
-        // Now we can use the Solution2D property safely
+        
         int[,] solution = puzzle.Solution2D;
 
         int fixedCellsCount = Mathf.Max(20, 40 - (levelNumber / 10)); // Easy = more fixed
         puzzle.fixedCells = GenerateFixedCells(solution, fixedCellsCount,seededRng);
+        puzzle.initialHints = 3; // You could vary this by level difficulty if desired
 
         int[,] playBoard = new int[9, 9];
         foreach (var fixedCell in puzzle.fixedCells)
@@ -318,7 +320,7 @@ public class SudokuPuzzleManager : MonoBehaviour
     
     private List<int> GetShuffledNumbers(System.Random rng)
     {
-        shuffleAttempts++; // Increment on each  call to reflect difficulty
+        shuffleAttempts++; // Increment on each  level to set level  difficultys //can also redesign according to design
         List<int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
       //  System.Random rng = new System.Random();
 
@@ -335,7 +337,7 @@ public class SudokuPuzzleManager : MonoBehaviour
         
     }
     
-    private void SavePuzzlesToJson() //saving json in compress way and easy to seserilize and deserialze //
+    private void SavePuzzlesToJson() // sav levels json
     {
         string filePath = Path.Combine(Application.persistentDataPath, SAVE_FILE_NAME);
 
@@ -486,12 +488,12 @@ public class SudokuPuzzleManager : MonoBehaviour
                 
             }
             
-            // Enable or disable based on availability
             bool isAvailable = levelStatus.levelNumber == 1 || 
                                (levelStatus.levelNumber > 1 && progressData.levels[i-1].completed);
+            // changes here according to level design
             button.interactable = isAvailable;// changes
             
-            // Store level number and set click handler
+           
             int levelNumber = levelStatus.levelNumber;
 
             button.onClick.AddListener(() => LoadLevel(levelNumber));
@@ -500,7 +502,7 @@ public class SudokuPuzzleManager : MonoBehaviour
     
     public void LoadLevel(int levelNumber)
     {
-        // Find the puzzle
+        
         SudokuPuzzleData puzzle = puzzles.Find(p => p.levelNumber == levelNumber);
         if (puzzle == null)
         {
@@ -517,8 +519,9 @@ public class SudokuPuzzleManager : MonoBehaviour
         //  sudokuGrid.ClearGrid();
         sudokuGrid.GenerateGrid();
       //  sudokuGrid.SetSolution(puzzle.solution);
-        sudokuGrid.SetSolution(puzzle.Solution2D); 
-       // PrintGrid(puzzle.solution);
+        sudokuGrid.SetSolution(puzzle.Solution2D);
+        sudokuGrid.SetHintsRemaining(puzzle.initialHints);
+        // PrintGrid(puzzle.solution);
         PrintGrid(puzzle.Solution2D);
        // sudokuGrid.SetSwapCount(puzzle.initialSwaps);
         sudokuGrid.SetCurrentLevel(levelNumber);
@@ -529,7 +532,7 @@ public class SudokuPuzzleManager : MonoBehaviour
             sudokuGrid.SetFixedCell(fixedCell.row, fixedCell.col, fixedCell.value);
         }
         
-        // Reset and show the grid
+        // Reset grid
         sudokuGrid.InitializeRemainingCells();
         sudokuGrid.gameObject.SetActive(true);
     }

@@ -22,7 +22,10 @@ public class SudukoGrid : MonoBehaviour
     [SerializeField] private TextMeshProUGUI personalBestTimerText;
     [SerializeField] private Button backButton;
     [SerializeField] private SudokuPuzzleManager puzzleManager;
+    [SerializeField] private TextMeshProUGUI hintsRemainingText;
+    [SerializeField] private Button hintButton;
 
+    [SerializeField] private int hintsRemaining = 3;
     private float levelTimer = 0f;
     private bool isTiming = false;
     public float CurrentTimer => levelTimer; // Accessor for external scripts
@@ -45,19 +48,72 @@ public class SudukoGrid : MonoBehaviour
             backButton.onClick.AddListener(OnBackButtonClicked);
         }
 
-       // GenerateGrid();
+        if (hintButton != null)
+        {
+            hintButton.onClick.AddListener(UseHint);
+        }
+
+        // GenerateGrid();
         //UpdateSwapCountDisplay();
         UpdateLevelDisplay();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         if (isTiming)
         {
             levelTimer += Time.deltaTime;
             UpdateTimerDisplay();
         }
+        if (hintsRemainingText != null)
+        {
+            hintsRemainingText.text = $"Hints: {hintsRemaining}";
+        }
         chancesRemainingText.text = $"Chances Remaining: {chancesRemaining}";
+    }
+
+    public void UseHint()
+    {
+        if (hintsRemaining <= 0) //|| gameWon
+        {
+            Debug.Log("No hints remaining");
+            return;
+        }
+
+        // Find a cell that doesn't match the solution
+        List<(int rowPos, int colPos)> incorrectCells = new List<(int rowPos, int colPos)>();
+
+        for (int r = 0; r < GRID_SIZE; r++)
+        {
+            for (int c = 0; c < GRID_SIZE; c++)
+            {
+                if (!grid[r, c].IsFixed && grid[r, c].GetNumber() != solution[r, c])
+                {
+                    incorrectCells.Add((r, c));
+                }
+            }
+        }
+
+        if (incorrectCells.Count == 0)
+        {
+            Debug.Log("All cells are correct!");
+            return;
+        }
+
+       
+        int randomIndex = Random.Range(0, incorrectCells.Count);
+        var (cellRow, cellCol) = incorrectCells[randomIndex];
+
+       
+        //add animations or effects //here
+        grid[cellRow, cellCol].SetNumber(solution[cellRow, cellCol]);
+        grid[cellRow, cellCol].SetColor(Color.green);
+
+      
+        hintsRemaining--;
+
+       
+        CheckWinCondition();
     }
     private void UpdateTimerDisplay()
     {
@@ -269,11 +325,16 @@ public class SudukoGrid : MonoBehaviour
          //   GetFixedCells().Add((row, col));
         }
     }
+    public void SetHintsRemaining(int count)
+    {
+        hintsRemaining = count;
+    }
 
     public void InitializeRemainingCells()
     {
         StartTimer();
         chancesRemaining = 3;
+        hintsRemaining = 3;
         HashSet<(int, int)> fixedCells = GetFixedCells();
         List<int> nonFixedNumbers = new List<int>();
         List<(int, int)> nonFixedPositions = new List<(int, int)>();

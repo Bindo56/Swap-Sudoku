@@ -80,9 +80,8 @@ public class SudukoGrid : MonoBehaviour
             return;
         }
 
-        // Find a cell that doesn't match the solution
+        // Find all cells that don't match the solution
         List<(int rowPos, int colPos)> incorrectCells = new List<(int rowPos, int colPos)>();
-
         for (int r = 0; r < GRID_SIZE; r++)
         {
             for (int c = 0; c < GRID_SIZE; c++)
@@ -100,19 +99,57 @@ public class SudukoGrid : MonoBehaviour
             return;
         }
 
-       
-        int randomIndex = Random.Range(0, incorrectCells.Count);
-        var (cellRow, cellCol) = incorrectCells[randomIndex];
+        // Find pairs of incorrect cells that could be swapped to improve the grid
+        List<((int r1, int c1), (int r2, int c2))> swappablePairs = new List<((int r1, int c1), (int r2, int c2))>();
 
-       
-        //add animations or effects //here
-        grid[cellRow, cellCol].SetNumber(solution[cellRow, cellCol]);
-        grid[cellRow, cellCol].SetColor(Color.green);
+        for (int i = 0; i < incorrectCells.Count; i++)
+        {
+            var (r1, c1) = incorrectCells[i];
+            int currentVal1 = grid[r1, c1].GetNumber();
 
-      
+            for (int j = i + 1; j < incorrectCells.Count; j++)
+            {
+                var (r2, c2) = incorrectCells[j];
+                int currentVal2 = grid[r2, c2].GetNumber();
+
+                // Check if swapping would improve the situation
+                if (currentVal1 == solution[r2, c2] && currentVal2 == solution[r1, c1])
+                {
+                    swappablePairs.Add(((r1, c1), (r2, c2)));
+                }
+            }
+        }
+
+        if (swappablePairs.Count == 0)
+        {
+            // Fall back to original behavior if no swappable pairs found
+            int randomIndex = Random.Range(0, incorrectCells.Count);
+            var (cellRow, cellCol) = incorrectCells[randomIndex];
+
+            grid[cellRow, cellCol].SetNumber(solution[cellRow, cellCol]);
+            grid[cellRow, cellCol].SetColor(Color.green);
+            Debug.Log("No swappable pairs found. Revealing one correct cell.");
+        }
+        else
+        {
+            // Choose a random pair to swap
+            int randomPairIndex = Random.Range(0, swappablePairs.Count);
+            var ((r1, c1), (r2, c2)) = swappablePairs[randomPairIndex];
+
+            // Swap the values
+            int temp = grid[r1, c1].GetNumber();
+            grid[r1, c1].SetNumber(grid[r2, c2].GetNumber());
+            grid[r2, c2].SetNumber(temp);
+
+            // Highlight the swapped cells
+            grid[r1, c1].SetColor(Color.yellow);
+            grid[r2, c2].SetColor(Color.yellow);
+
+           // Debug.Log($"Swapped cells at ({r1},{c1}) and ({r2},{c2})");
+        }
+
         hintsRemaining--;
 
-       
         CheckWinCondition();
     }
     private void UpdateTimerDisplay()

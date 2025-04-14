@@ -17,6 +17,7 @@ public class SudukoGrid : MonoBehaviour
      public TextMeshProUGUI swapCountText;*/
     [SerializeField] int chancesRemaining = 3;
     [SerializeField] private TextMeshProUGUI chancesRemainingText;
+    [SerializeField] private TextMeshProUGUI starText;
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private TextMeshProUGUI personalBestTimerText;
@@ -601,6 +602,7 @@ public class SudukoGrid : MonoBehaviour
             {
                 puzzleManager.MarkLevelCompleted(currentLevel, GetElapsedTime());
                 puzzleManager.LoadNextLevel();
+                starText.gameObject.SetActive(false);
             }
         }
         else if(chancesRemaining <= 0)
@@ -618,6 +620,7 @@ public class SudukoGrid : MonoBehaviour
         yield return new WaitForSeconds(1);
         if (puzzleManager != null)
         {
+            starText.gameObject.SetActive(false);
             puzzleManager.ReturnToLevelSelect();
         }
 
@@ -636,7 +639,8 @@ public class SudukoGrid : MonoBehaviour
         }
 
         //swapCountText.text = "YOU WIN!";
-
+        starText.gameObject.SetActive(true);
+        starText.text = "You Got" + chancesRemaining +  "Star";
         Debug.Log("YOU WIN!");
        
         gameWon = true;

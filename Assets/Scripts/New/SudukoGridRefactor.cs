@@ -210,7 +210,7 @@ public class SudukoGrid : MonoBehaviour
     {
         if (gridParent == null)
             return;
-
+        starText.gameObject.SetActive(false);
         foreach (Transform child in gridParent)
         {
             if (child != null)
@@ -595,15 +595,10 @@ public class SudukoGrid : MonoBehaviour
         {
             Debug.Log("Sudoku Solved! Congratulations!");
             gameWon = true;
-            ShowWinMessage();
+           StartCoroutine( ShowWinMessage());
 
-            // Mark level as completed
-            if (puzzleManager != null)
-            {
-                puzzleManager.MarkLevelCompleted(currentLevel, GetElapsedTime());
-                puzzleManager.LoadNextLevel();
-                starText.gameObject.SetActive(false);
-            }
+            
+          
         }
         else if(chancesRemaining <= 0)
         {
@@ -620,13 +615,13 @@ public class SudukoGrid : MonoBehaviour
         yield return new WaitForSeconds(1);
         if (puzzleManager != null)
         {
-            starText.gameObject.SetActive(false);
+           
             puzzleManager.ReturnToLevelSelect();
         }
 
     }
 
-    void ShowWinMessage()
+    IEnumerator ShowWinMessage()
     {
         StopTimer();
         // Set all cells to green to indicate victory
@@ -641,9 +636,18 @@ public class SudukoGrid : MonoBehaviour
         //swapCountText.text = "YOU WIN!";
         starText.gameObject.SetActive(true);
         starText.text = "You Got" + chancesRemaining +  "Star";
+
         Debug.Log("YOU WIN!");
        
         gameWon = true;
+        yield return new WaitForSeconds(3.0f);
+
+        if (puzzleManager != null)
+        {
+            puzzleManager.MarkLevelCompleted(currentLevel, GetElapsedTime());// Mark level as completed
+            puzzleManager.LoadNextLevel();
+
+        }
 
     }
 

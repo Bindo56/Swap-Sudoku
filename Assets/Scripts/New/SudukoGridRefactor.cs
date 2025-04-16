@@ -210,7 +210,7 @@ public class SudukoGrid : MonoBehaviour
     {
         if (gridParent == null)
             return;
-        starText.gameObject.SetActive(false);
+      //  starText.gameObject.SetActive(false);
         foreach (Transform child in gridParent)
         {
             if (child != null)
@@ -603,14 +603,37 @@ public class SudukoGrid : MonoBehaviour
         else if(chancesRemaining <= 0)
         {
             Debug.Log("0  chaces reamining");
-            chancesRemainingText.text = "Game Over";
+          //  chancesRemainingText.text = "Game Over";
+            puzzleManager.gameOverPanel.gameObject.SetActive(true);
+          //  starText.gameObject.SetActive(true);
+            starText.text = "You Got" + chancesRemaining + "Star";
+            puzzleManager.giveChanceBtn.onClick.AddListener(() => { StartCoroutine(replyPanelByReward()); });
+            puzzleManager.levlSelectionBtn.onClick.AddListener(() => { StartCoroutine(BackToLevelSelection()); });
+            puzzleManager.SetGameOverPanel("Game Over");
             //add couroutine or delay it 
-            StartCoroutine(Delay());
+           // StartCoroutine(Delay());
 
         }
     }
 
-    IEnumerator Delay()
+    IEnumerator replyPanelByReward()
+    {
+        chancesRemaining = 1;
+        hintsRemaining = 0;
+        yield return new WaitForSeconds(0.5f);
+        puzzleManager.gameOverPanel.gameObject.SetActive(false);
+    }
+
+    IEnumerator BackToLevelSelection()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if (puzzleManager != null)
+        {
+            puzzleManager.ReturnToLevelSelect();
+        }
+    }
+
+    IEnumerator Delay() //bck to level selection
     {
         yield return new WaitForSeconds(1);
         if (puzzleManager != null)
@@ -634,8 +657,7 @@ public class SudukoGrid : MonoBehaviour
         }
 
         //swapCountText.text = "YOU WIN!";
-        starText.gameObject.SetActive(true);
-        starText.text = "You Got" + chancesRemaining +  "Star";
+      
 
         Debug.Log("YOU WIN!");
        

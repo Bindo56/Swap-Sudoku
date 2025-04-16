@@ -16,6 +16,10 @@ public class SudokuPuzzleManager : MonoBehaviour
     [SerializeField] private GameObject levelSelectPanel;
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private Transform levelButtonContainer;
+    public Transform gameOverPanel;
+    public Button giveChanceBtn;
+    public Button levlSelectionBtn;
+    public TextMeshProUGUI gameOverText;
     
     private const int TOTAL_PUZZLES = 100;
     private const string SAVE_FILE_NAME = "sudoku_puzzles.json";
@@ -109,6 +113,11 @@ public class SudokuPuzzleManager : MonoBehaviour
             LoadPuzzlesAndProgress();
             ShowLevelSelect();
         }
+    }
+
+    public void SetGameOverPanel(string gameOverTextS)
+    {
+        gameOverText.text = gameOverTextS;
     }
 
     public void LoadNextLevel()

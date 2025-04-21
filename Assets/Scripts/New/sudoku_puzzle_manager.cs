@@ -16,6 +16,8 @@ public class SudokuPuzzleManager : MonoBehaviour
     [SerializeField] private GameObject levelSelectPanel;
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private Transform levelButtonContainer;
+
+
     public Transform gameOverPanel;
     public Button giveChanceBtn;
     public Button levlSelectionBtn;
@@ -101,6 +103,8 @@ public class SudokuPuzzleManager : MonoBehaviour
 
     private void Start()
     {
+       
+    
         sudokuGrid = SudukoGrid.instance;
         // Check if puzzles already exist, otherwise generate them
         if (!DoPuzzlesExist())
@@ -585,6 +589,9 @@ public class SudokuPuzzleManager : MonoBehaviour
             SaveProgressData();
         }*/
     }
+
+
+  
     
     public void ReturnToLevelSelect()
     {

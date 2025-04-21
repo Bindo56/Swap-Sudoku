@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SudukoGrid : MonoBehaviour
@@ -26,6 +27,10 @@ public class SudukoGrid : MonoBehaviour
     [SerializeField] private TextMeshProUGUI hintsRemainingText;
     [SerializeField] private Button hintButton;
 
+
+
+    [SerializeField] Transform[] star;
+    [SerializeField] Transform pauseMenu;
     [SerializeField] private int hintsRemaining = 3;
     private float levelTimer = 0f;
     private bool isTiming = false;
@@ -44,6 +49,7 @@ public class SudukoGrid : MonoBehaviour
     }
     void Start()
     {
+        pauseMenu.gameObject.SetActive(false);
         if (backButton != null)
         {
             backButton.onClick.AddListener(OnBackButtonClicked);
@@ -605,8 +611,15 @@ public class SudukoGrid : MonoBehaviour
             Debug.Log("0  chaces reamining");
           //  chancesRemainingText.text = "Game Over";
             puzzleManager.gameOverPanel.gameObject.SetActive(true);
-          //  starText.gameObject.SetActive(true);
+            //  starText.gameObject.SetActive(true);
             starText.text = "You Got" + chancesRemaining + "Star";
+            
+            
+                star[0].gameObject.SetActive(false);
+                star[1].gameObject.SetActive(false);
+                star[3].gameObject.SetActive(false);
+            
+
             puzzleManager.giveChanceBtn.onClick.AddListener(() => { StartCoroutine(replyPanelByReward()); });
             puzzleManager.levlSelectionBtn.onClick.AddListener(() => { StartCoroutine(BackToLevelSelection()); });
             puzzleManager.SetGameOverPanel("Game Over");
@@ -627,6 +640,7 @@ public class SudukoGrid : MonoBehaviour
     IEnumerator BackToLevelSelection()
     {
         yield return new WaitForSeconds(0.5f);
+      
         if (puzzleManager != null)
         {
             puzzleManager.ReturnToLevelSelect();
@@ -647,6 +661,7 @@ public class SudukoGrid : MonoBehaviour
     IEnumerator ShowWinMessage()
     {
         StopTimer();
+        puzzleManager.SetGameOverPanel("You Won");
         // Set all cells to green to indicate victory
         for (int row = 0; row < GRID_SIZE; row++)
         {
@@ -655,22 +670,55 @@ public class SudukoGrid : MonoBehaviour
                 grid[row, col].SetColor(Color.green);
             }
         }
-
+        puzzleManager.gameOverPanel.gameObject.SetActive(true);
         //swapCountText.text = "YOU WIN!";
+        if (chancesRemaining == 1)
+        {
+            star[0].gameObject.SetActive(true);
+        }
+        else if (chancesRemaining == 2)
+        {
+            star[0].gameObject.SetActive(true);
+            star[1].gameObject.SetActive(true);
+        }
+        else if (chancesRemaining == 3)
+        {
+            star[0].gameObject.SetActive(true);
+            star[1].gameObject.SetActive(true);
+            star[3].gameObject.SetActive(true);
+        }
       
 
         Debug.Log("YOU WIN!");
-       
+
         gameWon = true;
         yield return new WaitForSeconds(3.0f);
 
         if (puzzleManager != null)
         {
+            puzzleManager.gameOverPanel.gameObject.SetActive(false);
             puzzleManager.MarkLevelCompleted(currentLevel, GetElapsedTime());// Mark level as completed
             puzzleManager.LoadNextLevel();
 
         }
 
+    }
+    public void OpenpauseMenu()
+    {
+        pauseMenu.gameObject.SetActive(true);
+    }
+    public void ClosepauseMenu()
+    {
+        pauseMenu.gameObject.SetActive(false);
+    }
+    public void OpenLevelCourotine()
+    {
+        pauseMenu.gameObject.SetActive(false);
+        StartCoroutine(BackToLevelSelection());
+    }
+    public void OpenMainMenu()
+    {
+        SceneManager.LoadSceneAsync(1);
     }
 
     public bool IsGameWon()

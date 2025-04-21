@@ -8,5 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Suduko.unity
     guid: a5a80ef329ae62446b8b3ca347eaaa11
+  - enabled: 1
+    path: Assets/MainMenu.unity
+    guid: 346e0883edd3a6c4ebec05935733374a
   m_configObjects: {}
-  m_UseUCBPForAssetBundles: 0

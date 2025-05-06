@@ -18,7 +18,7 @@ public class SudukoGrid : MonoBehaviour
      public TextMeshProUGUI swapCountText;*/
     [SerializeField] int chancesRemaining = 3;
     [SerializeField] private TextMeshProUGUI chancesRemainingText;
-    [SerializeField] private TextMeshProUGUI starText;
+   // [SerializeField] private TextMeshProUGUI starText;
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private TextMeshProUGUI personalBestTimerText;
@@ -27,8 +27,8 @@ public class SudukoGrid : MonoBehaviour
     [SerializeField] private TextMeshProUGUI hintsRemainingText;
     [SerializeField] private Button hintButton;
 
-
-
+    [SerializeField] Transform gameLosePanel;
+    [SerializeField] Transform[] chncestransform;
     [SerializeField] Transform[] star;
     [SerializeField] Transform pauseMenu;
     [SerializeField] private int hintsRemaining = 3;
@@ -76,7 +76,30 @@ public class SudukoGrid : MonoBehaviour
         {
             hintsRemainingText.text = $"Hints: {hintsRemaining}";
         }
+
+
+        if (chancesRemaining >= 0)
+        {
+            //  chancesRemaining--;
+
+            if (chancesRemaining >= 0 && chancesRemaining < chncestransform.Length)
+            {
+               // stars[chancesRemaining].SetActive(false);
+                chncestransform[chancesRemaining].gameObject.SetActive(false);
+            }
+
+        }
+
         chancesRemainingText.text = $"Chances Remaining: {chancesRemaining}";
+    }
+
+    public void ResetChances()
+    {
+       // chancesRemaining = 3;
+        foreach(Transform star in chncestransform)
+        {
+            star.gameObject.SetActive(true);
+        }
     }
 
     public void UseHint()
@@ -610,16 +633,17 @@ public class SudukoGrid : MonoBehaviour
         {
             Debug.Log("0  chaces reamining");
           //  chancesRemainingText.text = "Game Over";
-            puzzleManager.gameOverPanel.gameObject.SetActive(true);
-            //  starText.gameObject.SetActive(true);
-            starText.text = "You Got" + chancesRemaining + "Star";
-            
-            
-                star[0].gameObject.SetActive(false);
-                star[1].gameObject.SetActive(false);
-                star[3].gameObject.SetActive(false);
-            
+          //  puzzleManager.gameOverPanel.gameObject.SetActive(true);
+            gameLosePanel.gameObject.SetActive(true);
 
+
+            //  starText.gameObject.SetActive(true);
+           // starText.text = "You Got" + chancesRemaining + "Star";
+          /*  foreach(Transform stars in star)
+            {
+                stars.gameObject.SetActive(false);
+              
+            }*/
             puzzleManager.giveChanceBtn.onClick.AddListener(() => { StartCoroutine(replyPanelByReward()); });
             puzzleManager.levlSelectionBtn.onClick.AddListener(() => { StartCoroutine(BackToLevelSelection()); });
             puzzleManager.SetGameOverPanel("Game Over");
@@ -629,8 +653,37 @@ public class SudukoGrid : MonoBehaviour
         }
     }
 
+    public void RetryLevel()
+    {
+        gameLosePanel.gameObject.SetActive(false);
+        puzzleManager.ClosePause();
+        puzzleManager.RetryLevel();
+        ResetChances();
+        hintsRemaining = 3;
+        chancesRemaining = 3;
+        //  yield return new WaitForSeconds(0.5f);
+        // puzzleManager.gameOverPanel.gameObject.SetActive(false);
+    }
+
+    public void quitLevel()
+    {
+        if (puzzleManager != null)
+        {
+            chancesRemaining = 3;
+            gameLosePanel.gameObject.SetActive(false);
+            ResetChances();
+            puzzleManager.ReturnToLevelSelect();
+        }
+    }
+
+    public void replyWithChances()
+    {
+        StartCoroutine(replyPanelByReward());
+    }
+
     IEnumerator replyPanelByReward()
     {
+        puzzleManager.ClosePause();
         chancesRemaining = 1;
         hintsRemaining = 0;
         yield return new WaitForSeconds(0.5f);
@@ -643,6 +696,7 @@ public class SudukoGrid : MonoBehaviour
       
         if (puzzleManager != null)
         {
+            ResetChances();
             puzzleManager.ReturnToLevelSelect();
         }
     }
@@ -672,7 +726,13 @@ public class SudukoGrid : MonoBehaviour
         }
         puzzleManager.gameOverPanel.gameObject.SetActive(true);
         //swapCountText.text = "YOU WIN!";
-        if (chancesRemaining == 1)
+
+        for (int i = 0; i < star.Length; i++)
+        {
+            star[i].gameObject.SetActive(i < chancesRemaining);
+        }
+
+       /* if (chancesRemaining == 1)
         {
             star[0].gameObject.SetActive(true);
         }
@@ -685,8 +745,8 @@ public class SudukoGrid : MonoBehaviour
         {
             star[0].gameObject.SetActive(true);
             star[1].gameObject.SetActive(true);
-            star[3].gameObject.SetActive(true);
-        }
+            star[2].gameObject.SetActive(true);
+        }*/
       
 
         Debug.Log("YOU WIN!");

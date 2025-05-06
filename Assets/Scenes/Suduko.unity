@@ -452,7 +452,7 @@ GameObject:
   - component: {fileID: 218071256}
   - component: {fileID: 218071255}
   m_Layer: 5
-  m_Name: LvlSelectionButton
+  m_Name: ExitBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -585,7 +585,7 @@ GameObject:
   - component: {fileID: 240393655}
   - component: {fileID: 240393654}
   m_Layer: 5
-  m_Name: LevelSelection
+  m_Name: ExitBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -718,7 +718,7 @@ GameObject:
   - component: {fileID: 252407670}
   - component: {fileID: 252407669}
   m_Layer: 5
-  m_Name: NEXT LEVEL_1
+  m_Name: RestartLevel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -788,10 +788,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1940389246}
-        m_TargetAssemblyTypeName: SudokuPuzzleManager, Assembly-CSharp
-        m_MethodName: LoadLevel
-        m_Mode: 3
+      - m_Target: {fileID: 1624698856}
+        m_TargetAssemblyTypeName: SudukoGrid, Assembly-CSharp
+        m_MethodName: RetryLevel
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -1194,7 +1194,7 @@ GameObject:
   - component: {fileID: 326733244}
   - component: {fileID: 326733243}
   m_Layer: 5
-  m_Name: Resume
+  m_Name: Reply[GiveOneChance]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1266,7 +1266,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1624698856}
         m_TargetAssemblyTypeName: SudukoGrid, Assembly-CSharp
-        m_MethodName: ClosepauseMenu
+        m_MethodName: replyWithChances
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1463,7 +1463,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &368965606
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1507,7 +1507,7 @@ GameObject:
   - component: {fileID: 382276835}
   - component: {fileID: 382276834}
   m_Layer: 5
-  m_Name: GameOverPanel
+  m_Name: GameWinPanel[Used]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3594,7 +3594,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 953330777}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1624698856}
+        m_TargetAssemblyTypeName: SudukoGrid, Assembly-CSharp
+        m_MethodName: quitLevel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &953330777
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4898,10 +4910,10 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1940389246}
-        m_TargetAssemblyTypeName: SudokuPuzzleManager, Assembly-CSharp
-        m_MethodName: LoadLevel
-        m_Mode: 3
+      - m_Target: {fileID: 1624698856}
+        m_TargetAssemblyTypeName: SudukoGrid, Assembly-CSharp
+        m_MethodName: RetryLevel
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -5005,7 +5017,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Resume
+  m_text: 'Get One Chances
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5220,7 +5234,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1353907443
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5691,7 +5705,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1467458741}
   m_Layer: 5
-  m_Name: GameOverWin
+  m_Name: GameOverWin[Unused]
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6413,7 +6427,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1570277812}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1624698856}
+        m_TargetAssemblyTypeName: SudukoGrid, Assembly-CSharp
+        m_MethodName: RetryLevel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1570277812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6770,7 +6796,6 @@ MonoBehaviour:
   gridParent: {fileID: 1624698855}
   chancesRemaining: 3
   chancesRemainingText: {fileID: 1353907444}
-  starText: {fileID: 0}
   levelText: {fileID: 755466643}
   timerText: {fileID: 388010648}
   personalBestTimerText: {fileID: 1477599495}
@@ -6778,6 +6803,11 @@ MonoBehaviour:
   puzzleManager: {fileID: 1940389246}
   hintsRemainingText: {fileID: 1054429286}
   hintButton: {fileID: 157050442}
+  gameLosePanel: {fileID: 908082827}
+  chncestransform:
+  - {fileID: 665407686}
+  - {fileID: 382752572}
+  - {fileID: 1040985849}
   star:
   - {fileID: 547561525}
   - {fileID: 989544956}

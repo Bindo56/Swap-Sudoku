@@ -508,14 +508,21 @@ public class SudokuPuzzleManager : MonoBehaviour
             
            
             int levelNumber = levelStatus.levelNumber;
-
+          //  Debug.Log(levelNumber + ":");
+           
             button.onClick.AddListener(() => LoadLevel(levelNumber));
         }
     }
-    
+
+    int currentlevel = 0;
+    public void RetryLevel()
+    {
+        Debug.Log(currentlevel);
+        LoadLevel(currentlevel);
+    }
     public void LoadLevel(int levelNumber)
     {
-        
+        currentlevel = levelNumber;
         SudokuPuzzleData puzzle = puzzles.Find(p => p.levelNumber == levelNumber);
         if (puzzle == null)
         {

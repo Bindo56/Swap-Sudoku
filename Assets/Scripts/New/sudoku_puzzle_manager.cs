@@ -16,7 +16,7 @@ public class SudokuPuzzleManager : MonoBehaviour
     [SerializeField] private GameObject levelSelectPanel;
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private Transform levelButtonContainer;
-
+    public GameObject pausePanel;
 
     public Transform gameOverPanel;
     public Button giveChanceBtn;
@@ -590,9 +590,17 @@ public class SudokuPuzzleManager : MonoBehaviour
         }*/
     }
 
+    public void OpenPause()
+    {
+        if (pausePanel != null) pausePanel.SetActive(true);
+    }
 
-  
-    
+    public void ClosePause()
+    {
+        if (pausePanel != null) pausePanel.SetActive(false);
+    }
+
+
     public void ReturnToLevelSelect()
     {
         //  sudokuGrid.gameObject.SetActive(false);

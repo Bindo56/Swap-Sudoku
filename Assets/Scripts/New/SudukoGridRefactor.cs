@@ -365,8 +365,8 @@ public class SudukoGrid : MonoBehaviour
         if (grid[row, col] != null)
         {
             grid[row, col].SetNumber(value, true);
-            grid[row, col].SetColor(Color.blue);
-         //   GetFixedCells().Add((row, col));
+            grid[row, col].SetColor(new Color(0.66f, 0.36f, 0.36f));
+            //   GetFixedCells().Add((row, col));
         }
     }
     public void SetHintsRemaining(int count)

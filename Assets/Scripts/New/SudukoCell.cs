@@ -267,7 +267,7 @@ public class SudukoCell : MonoBehaviour , IDraggable, IHoldable, IPointerDownHan
         IsFixed = isFixed;
         if (IsFixed)
         {
-            GetComponent<Image>().color = Color.blue; // Highlight fixed cells
+            GetComponent<Image>().color = new Color(0.66f, 0.36f, 0.36f); // Highlight fixed cells
         }
         else
         {
